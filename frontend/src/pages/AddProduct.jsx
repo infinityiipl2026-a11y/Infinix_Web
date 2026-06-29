@@ -1,0 +1,273 @@
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+const AddProduct = () => {
+
+  const { user } = useAuth();
+
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    family: "",
+    name: "",
+    category: "",
+    variant: "",
+    size: "",
+    price: "",
+    image: null,
+    description: "",
+    ingredients: ""
+  });
+
+  const [message, setMessage] =
+    useState("");
+
+  const handleChange = (e) => {
+
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.value
+    });
+
+  };
+
+  const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "family",
+      form.family
+    );
+
+    formData.append(
+      "name",
+      form.name
+    );
+
+    formData.append(
+      "category",
+      form.category
+    );
+
+    formData.append(
+      "variant",
+      form.variant
+    );
+
+    formData.append(
+      "size",
+      form.size
+    );
+
+    formData.append(
+      "price",
+      form.price
+    );
+
+    formData.append(
+      "image",
+      form.image
+    );
+
+    formData.append(
+      "description",
+      form.description
+    );
+
+    formData.append(
+      "ingredients",
+      form.ingredients
+    );
+
+    try {
+
+      const response =
+        await fetch(
+          "http://127.0.0.1:5000/add-product",
+          {
+            method: "POST",
+
+            headers: {
+              "X-User-Role":
+                user?.role || ""
+            },
+
+            body: formData
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (data.success) {
+
+        navigate("/admin");
+
+      } else {
+
+        setMessage(
+          data.message
+        );
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+      setMessage(
+        "Server Error"
+      );
+
+    }
+
+  };
+
+  return (
+
+    <div className="admin-container">
+
+      <h1 className="admin-title">
+        Add Product
+      </h1>
+
+      {message && (
+
+        <p
+          style={{
+            color: "red",
+            marginBottom: "15px"
+          }}
+        >
+          {message}
+        </p>
+
+      )}
+
+      <form
+        className="admin-form"
+        onSubmit={handleSubmit}
+      >
+
+        <input
+          name="family"
+          placeholder="Family"
+          value={form.family}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="name"
+          placeholder="Product Name"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
+
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          required
+        >
+
+          <option value="">
+            Select Category
+          </option>
+
+          <option value="Perfumes">
+            Perfumes
+          </option>
+
+          <option value="Cosmetics">
+            Cosmetics
+          </option>
+
+          <option value="Household">
+            Household
+          </option>
+
+          <option value="Soap">
+            Soap
+          </option>
+
+        </select>
+
+        <input
+          name="variant"
+          placeholder="Variant"
+          value={form.variant}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="size"
+          placeholder="Size"
+          value={form.size}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="number"
+          step="0.01"
+          name="price"
+          placeholder="Price"
+          value={form.price}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            setForm({
+              ...form,
+              image:
+                e.target.files[0]
+            })
+          }
+          required
+        />
+
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
+          onChange={handleChange}
+          required
+        />
+
+        <textarea
+          name="ingredients"
+          placeholder="Ingredients"
+          value={form.ingredients}
+          onChange={handleChange}
+          required
+        />
+
+        <button
+          type="submit"
+          className="btn"
+        >
+          Save Product
+        </button>
+
+      </form>
+
+    </div>
+
+  );
+
+};
+
+export default AddProduct;
