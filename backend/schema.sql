@@ -99,3 +99,19 @@ CREATE TABLE orders (
 INSERT INTO users (fullname, email, password, role)
 SELECT 'Infinix Admin', 'admin@infinix.com', '$2b$12$7sJGQiVTsp8DdK9sXNH1eOkbOP3miCh5XBZRQe18FJJFAtHpKVCrK', 'admin'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@infinix.com');
+
+-- =========================================================
+-- AUTH REDESIGN: additive columns only (run once, existing
+-- tables/data are untouched). Safe to skip if already applied.
+-- =========================================================
+
+-- Enables the new Forgot/Reset Password flow
+ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) NULL;
+ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME NULL;
+
+-- Enables storing the phone number captured by the redesigned Register form
+ALTER TABLE users ADD COLUMN phone VARCHAR(15) NULL;
+
+ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) NULL;
+ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME NULL;
+ALTER TABLE users ADD COLUMN phone VARCHAR(15) NULL;

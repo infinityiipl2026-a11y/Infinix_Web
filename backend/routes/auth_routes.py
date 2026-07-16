@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime, timedelta
 import bcrypt
+import secrets
 
 from config.mysql import get_db
 
@@ -13,6 +15,10 @@ def register():
     fullname = data.get("fullname", "").strip()
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
+    # phone is accepted from the redesigned Register form but not yet
+    # persisted — add a `phone VARCHAR(15)` column to `users` (see
+    # schema.sql) and an INSERT param below to store it.
+    phone = data.get("phone", "").strip()
 
     if not fullname or not email or not password:
         return jsonify({"success": False, "message": "All fields are required."}), 400
@@ -34,8 +40,8 @@ def register():
         ).decode("utf-8")
 
         cursor.execute(
-            "INSERT INTO users (fullname, email, password, role) VALUES (%s, %s, %s, %s)",
-            (fullname, email, hashed_password, "user")
+            "INSERT INTO users (fullname, email, password, role, phone) VALUES (%s, %s, %s, %s, %s)",
+            (fullname, email, hashed_password, "user", phone or None)
         )
         conn.commit()
 
@@ -43,6 +49,120 @@ def register():
 
     except Exception as exc:
         print("Register error:", exc)
+        return jsonify({"success": False, "message": "Server error."}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+RESET_TOKEN_TTL_MINUTES = 30
+
+
+@auth_bp.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    """
+    Generates a single-use reset token and (in a real deployment) emails
+    a link like /reset-password/<token> to the user.
+
+    Requires two additive columns on `users`:
+        ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) NULL;
+        ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME NULL;
+
+    Always returns success=True (even for unknown emails) so the
+    endpoint can't be used to enumerate registered accounts.
+    """
+    data = request.json or {}
+    email = data.get("email", "").strip().lower()
+
+    if not email:
+        return jsonify({"success": False, "message": "Email is required."}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+
+        if user:
+            token = secrets.token_urlsafe(32)
+            expiry = datetime.utcnow() + timedelta(minutes=RESET_TOKEN_TTL_MINUTES)
+
+            cursor.execute(
+                "UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE id = %s",
+                (token, expiry, user["id"])
+            )
+            conn.commit()
+
+            # TODO: send `token` via email service instead of logging it.
+            print(f"[password-reset] token for {email}: {token}")
+
+        return jsonify({
+            "success": True,
+            "message": "If an account exists for that email, a reset link has been sent."
+        })
+
+    except Exception as exc:
+        print("Forgot password error:", exc)
+        return jsonify({"success": False, "message": "Server error."}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password():
+    data = request.json or {}
+    token = data.get("token", "").strip()
+    password = data.get("password", "")
+
+    if not token or not password:
+        return jsonify({"success": False, "message": "Token and new password are required."}), 400
+
+    if len(password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters."}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute(
+            "SELECT id, reset_token_expiry FROM users WHERE reset_token = %s",
+            (token,)
+        )
+        user = cursor.fetchone()
+
+        if not user or not user["reset_token_expiry"] or user["reset_token_expiry"] < datetime.utcnow():
+            return jsonify({
+                "success": False,
+                "message": "This reset link is invalid or has expired."
+            }), 400
+
+        hashed_password = bcrypt.hashpw(
+            password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
+        cursor.execute(
+            "UPDATE users SET password = %s, reset_token = NULL, reset_token_expiry = NULL WHERE id = %s",
+            (hashed_password, user["id"])
+        )
+        conn.commit()
+
+        return jsonify({"success": True, "message": "Password reset successful."})
+
+    except Exception as exc:
+        print("Reset password error:", exc)
         return jsonify({"success": False, "message": "Server error."}), 500
 
     finally:

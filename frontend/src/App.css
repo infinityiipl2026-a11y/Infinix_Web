@@ -4006,3 +4006,258 @@ body {
   background: var(--accent);
 }
 
+
+/* =========================================================
+   AUTH REDESIGN (Login / Register / Forgot / Reset Password)
+   Additive only — reuses existing --primary/--accent theme
+   tokens and the pre-existing .auth-form class. Nothing
+   above this block was modified.
+========================================================= */
+
+.auth-card {
+  max-width: 460px;
+}
+
+.auth-eyebrow {
+  display: block;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent, #C8A96E);
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: var(--text-muted, #6B6B6B);
+  font-size: 14px;
+  margin-top: -12px;
+  margin-bottom: 22px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark, #1A1A1A);
+}
+
+.auth-field-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-field-control:focus-within {
+  border-color: var(--primary, #3B1F0E);
+  box-shadow: 0 0 0 3px rgba(59, 31, 14, 0.08);
+}
+
+.auth-field-control.has-error {
+  border-color: #e63946;
+}
+
+.auth-field-control.has-error:focus-within {
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+}
+
+.auth-field-control input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 13px 12px;
+  background: transparent;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.auth-field-icon {
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  color: var(--text-muted, #6B6B6B);
+}
+
+.auth-field-right {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.auth-toggle-visibility {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted, #6B6B6B);
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.auth-toggle-visibility:hover {
+  color: var(--primary, #3B1F0E);
+}
+
+.auth-field-hint {
+  font-size: 12px;
+  color: var(--text-muted, #6B6B6B);
+  margin: 0;
+}
+
+.auth-field-error {
+  font-size: 12px;
+  color: #e63946;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Password strength meter */
+.pw-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pw-strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.pw-strength-bar {
+  height: 5px;
+  flex: 1;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.pw-strength-label {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Checkbox rows */
+.auth-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-dark, #1A1A1A);
+  cursor: pointer;
+}
+
+.auth-checkbox input {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary, #3B1F0E);
+  cursor: pointer;
+}
+
+.auth-terms {
+  margin-top: 2px;
+}
+
+.auth-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.auth-link {
+  color: var(--primary, #3B1F0E);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-switch {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted, #6B6B6B);
+}
+
+/* Form-level message banner */
+.auth-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.auth-message-success {
+  background: rgba(42, 157, 143, 0.1);
+  color: #1d7a6f;
+}
+
+.auth-message-error {
+  background: rgba(230, 57, 70, 0.08);
+  color: #c1121f;
+}
+
+.auth-message-info {
+  background: rgba(59, 31, 14, 0.06);
+  color: var(--primary, #3B1F0E);
+}
+
+/* Submit button loading state */
+.auth-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.auth-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: auth-spin 0.7s linear infinite;
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    max-width: 100%;
+  }
+
+  .auth-row-between {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

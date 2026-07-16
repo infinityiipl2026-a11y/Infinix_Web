@@ -10,6 +10,8 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AddProduct from "./pages/AddProduct";
@@ -46,6 +48,14 @@ function App() {
             <Route
               path="/register"
               element={<Register />}
+            />
+            <Route
+              path="/forgot-password"
+              element={<ForgotPassword />}
+            />
+            <Route
+              path="/reset-password/:token"
+              element={<ResetPassword />}
             />
             <Route
               path="/dashboard"
