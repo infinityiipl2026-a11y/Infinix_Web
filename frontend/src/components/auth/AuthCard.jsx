@@ -1,6 +1,6 @@
 /**
  * Wraps all auth pages. Intentionally reuses the existing `.auth-form`
- * class (defined in App.css) so the current design system/theme is kept,
+ * class (defined in global.css) so the current design system/theme is kept,
  * and layers a new `.auth-card` class for the redesign-specific styling.
  */
 const AuthCard = ({ eyebrow, title, subtitle, children }) => {
