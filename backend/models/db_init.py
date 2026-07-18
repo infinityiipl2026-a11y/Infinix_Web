@@ -10,7 +10,10 @@ CREATE TABLE IF NOT EXISTS users (
     fullname VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'user'
+    role VARCHAR(50) NOT NULL DEFAULT 'user',
+    phone VARCHAR(15) NULL,
+    reset_token VARCHAR(64) NULL,
+    reset_token_expiry DATETIME NULL
 );
 
 CREATE TABLE IF NOT EXISTS products (

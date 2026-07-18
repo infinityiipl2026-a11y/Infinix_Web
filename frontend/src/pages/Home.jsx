@@ -1,6 +1,7 @@
 import ProductCard from "../components/ProductCard";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getProducts } from "../api/products";
 
 
 const Home = () => {
@@ -26,12 +27,8 @@ useEffect(() => {
 
     try {
 
-      const response = await fetch(
-        "http://127.0.0.1:5000/products"
-      );
-
       const data =
-        await response.json();
+        await getProducts();
 
       setFeaturedProducts(
         data.slice(0, 4)

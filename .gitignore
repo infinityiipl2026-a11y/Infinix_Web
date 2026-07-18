@@ -53,3 +53,11 @@ Thumbs.db
 # =========================
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+node_modules
+build
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+.env.example

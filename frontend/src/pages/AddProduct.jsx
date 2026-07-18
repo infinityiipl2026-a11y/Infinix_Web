@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { addProduct } from "../services/api";
 
 const AddProduct = () => {
-
-  const { user } = useAuth();
 
   const navigate = useNavigate();
 
@@ -87,23 +85,8 @@ const AddProduct = () => {
 
     try {
 
-      const response =
-        await fetch(
-          "http://127.0.0.1:5000/add-product",
-          {
-            method: "POST",
-
-            headers: {
-              "X-User-Role":
-                user?.role || ""
-            },
-
-            body: formData
-          }
-        );
-
       const data =
-        await response.json();
+        await addProduct(formData);
 
       if (data.success) {
 

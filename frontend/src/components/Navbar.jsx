@@ -37,7 +37,7 @@ const cartCount = cartItems.reduce(
 
   const navigate = useNavigate();
 
-  const { user, setUser } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -46,9 +46,8 @@ const cartCount = cartItems.reduce(
       console.log(error);
     }
 
-    setUser(null);
+    logout();
     localStorage.removeItem("cart");
-    localStorage.removeItem("user");
     window.location.reload();
   };
 

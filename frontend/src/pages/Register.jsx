@@ -32,8 +32,7 @@ const Register = () => {
       email: "",
       phone: "",
       password: "",
-      confirmPassword: "",
-      terms: false
+      confirmPassword: ""
     }
   });
 

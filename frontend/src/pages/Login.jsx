@@ -16,7 +16,7 @@ import FormMessage from "../components/auth/FormMessage";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, setToken } = useAuth();
 
   const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
 
@@ -38,7 +38,7 @@ const Login = () => {
 
       if (data.success) {
         setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        setToken(data.token);
         setServerMessage({ type: "success", text: "Login successful! Redirecting..." });
         setTimeout(() => navigate("/"), 700);
       } else {
@@ -83,14 +83,14 @@ const Login = () => {
         />
 
         <div className="auth-row-between">
-          <label className="auth-checkbox">
+          {/* <label className="auth-checkbox">
             <input type="checkbox" {...register("remember")} />
             <span>Remember me</span>
-          </label>
+          </label> */}
 
-          <Link to="/forgot-password" className="auth-link">
+          {/* <Link to="/forgot-password" className="auth-link">
             Forgot password?
-          </Link>
+          </Link> */}
         </div>
 
         <FormMessage type={serverMessage.type}>{serverMessage.text}</FormMessage>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import { useParams, Link } from "react-router-dom";
 import { getProduct, getProducts } from "../api/products";
+import { resolveImageUrl } from "../config";
 import { useCart } from "../context/CartContext";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -116,11 +117,7 @@ const ProductDetail = () => {
         <div className="product-detail-image">
 
           <img
-            src={
-              product.image?.startsWith("/uploads")
-                ? `http://127.0.0.1:5000${product.image}`
-                : product.image
-            }
+            src={resolveImageUrl(product.image)}
             alt={product.name}
           />
 
@@ -170,11 +167,7 @@ const ProductDetail = () => {
                     >
 
                       <img
-                        src={
-                          item.image?.startsWith("/uploads")
-                            ? `http://127.0.0.1:5000${item.image}`
-                            : item.image
-                        }
+                        src={resolveImageUrl(item.image)}
                         alt={item.variant}
                       />
 

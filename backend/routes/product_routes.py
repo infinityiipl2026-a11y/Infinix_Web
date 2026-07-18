@@ -1,7 +1,8 @@
-from functools import wraps
 from flask import Blueprint, request, jsonify
 
+from config import settings
 from config.mysql import get_db
+from utils.auth import admin_required
 
 import os
 import uuid
@@ -14,26 +15,11 @@ product_bp = Blueprint(
 )
 
 
-def admin_required(fn):
-
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-
-        user_role = request.headers.get(
-            "X-User-Role",
-            ""
-        )
-
-        if user_role != "admin":
-
-            return jsonify({
-                "success": False,
-                "message": "Admin access required."
-            }), 403
-
-        return fn(*args, **kwargs)
-
-    return wrapper
+def _allowed_image(filename):
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in settings.ALLOWED_IMAGE_EXTENSIONS
+    )
 
 
 @product_bp.route(
@@ -41,6 +27,9 @@ def admin_required(fn):
     methods=["GET"]
 )
 def get_products():
+
+    conn = None
+    cursor = None
 
     try:
 
@@ -88,6 +77,9 @@ def get_products():
     methods=["GET"]
 )
 def get_product(product_id):
+
+    conn = None
+    cursor = None
 
     try:
 
@@ -154,11 +146,42 @@ def add_product():
             "image"
         )
 
-        if not image:
+        if not image or not image.filename:
 
             return jsonify({
                 "success": False,
                 "message": "Image is required."
+            }), 400
+
+        if not _allowed_image(image.filename):
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Unsupported image type. Allowed: "
+                    + ", ".join(sorted(settings.ALLOWED_IMAGE_EXTENSIONS))
+                )
+            }), 400
+
+        try:
+            price = float(request.form["price"])
+            if price < 0:
+                raise ValueError("price must be non-negative")
+        except (KeyError, ValueError, TypeError):
+            return jsonify({
+                "success": False,
+                "message": "Price must be a valid non-negative number."
+            }), 400
+
+        required_form_fields = [
+            "family", "name", "category", "variant",
+            "size", "description", "ingredients"
+        ]
+        missing = [f for f in required_form_fields if not request.form.get(f)]
+        if missing:
+            return jsonify({
+                "success": False,
+                "message": f"Missing required field(s): {', '.join(missing)}"
             }), 400
 
         filename = (
@@ -169,7 +192,7 @@ def add_product():
             )
         )
 
-        upload_folder = "uploads"
+        upload_folder = settings.UPLOAD_FOLDER
 
         os.makedirs(
             upload_folder,
@@ -224,9 +247,7 @@ def add_product():
                 request.form["category"],
                 request.form["variant"],
                 request.form["size"],
-                float(
-                    request.form["price"]
-                ),
+                price,
                 image_path,
                 request.form["description"],
                 request.form["ingredients"]
@@ -250,7 +271,7 @@ def add_product():
 
         return jsonify({
             "success": False,
-            "message": str(exc)
+            "message": "Server error."
         }), 500
 
     finally:
@@ -306,6 +327,9 @@ def update_product(product_id):
             "At least one field is required."
         }), 400
 
+    conn = None
+    cursor = None
+
     try:
 
         conn = get_db()
@@ -360,6 +384,9 @@ def update_product(product_id):
 )
 @admin_required
 def delete_product(product_id):
+
+    conn = None
+    cursor = None
 
     try:
 

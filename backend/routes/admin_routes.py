@@ -1,24 +1,16 @@
-from flask import Blueprint, request, jsonify
-from functools import wraps
+from flask import Blueprint, jsonify
 
 from config.mysql import get_db
+from utils.auth import admin_required
 
 admin_bp = Blueprint("admin", __name__)
-
-
-def admin_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        user_role = request.headers.get("X-User-Role", "")
-        if user_role != "admin":
-            return jsonify({"success": False, "message": "Admin access required."}), 403
-        return fn(*args, **kwargs)
-    return wrapper
 
 
 @admin_bp.route("/admin", methods=["GET"])
 @admin_required
 def admin_dashboard():
+    conn = None
+    cursor = None
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)

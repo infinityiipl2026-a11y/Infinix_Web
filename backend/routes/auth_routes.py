@@ -1,14 +1,22 @@
-from flask import Blueprint, request, jsonify
+import re
 from datetime import datetime, timedelta
+
 import bcrypt
 import secrets
+from flask import Blueprint, request, jsonify
 
 from config.mysql import get_db
+from extensions import limiter
+from utils.auth import generate_token
 
 auth_bp = Blueprint("auth", __name__)
 
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+MIN_PASSWORD_LENGTH = 8
+
 
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("10 per hour")
 def register():
     data = request.json or {}
 
@@ -22,6 +30,15 @@ def register():
 
     if not fullname or not email or not password:
         return jsonify({"success": False, "message": "All fields are required."}), 400
+
+    if not EMAIL_RE.match(email):
+        return jsonify({"success": False, "message": "Enter a valid email address."}), 400
+
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return jsonify({
+            "success": False,
+            "message": f"Password must be at least {MIN_PASSWORD_LENGTH} characters."
+        }), 400
 
     try:
         conn = get_db()
@@ -62,6 +79,7 @@ RESET_TOKEN_TTL_MINUTES = 30
 
 
 @auth_bp.route("/forgot-password", methods=["POST"])
+@limiter.limit("5 per hour")
 def forgot_password():
     """
     Generates a single-use reset token and (in a real deployment) emails
@@ -119,6 +137,7 @@ def forgot_password():
 
 
 @auth_bp.route("/reset-password", methods=["POST"])
+@limiter.limit("10 per hour")
 def reset_password():
     data = request.json or {}
     token = data.get("token", "").strip()
@@ -127,8 +146,11 @@ def reset_password():
     if not token or not password:
         return jsonify({"success": False, "message": "Token and new password are required."}), 400
 
-    if len(password) < 8:
-        return jsonify({"success": False, "message": "Password must be at least 8 characters."}), 400
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return jsonify({
+            "success": False,
+            "message": f"Password must be at least {MIN_PASSWORD_LENGTH} characters."
+        }), 400
 
     conn = None
     cursor = None
@@ -173,6 +195,7 @@ def reset_password():
 
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
 def login():
     data = request.json or {}
 
@@ -198,8 +221,11 @@ def login():
         if not bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
             return jsonify({"success": False, "message": "Invalid email or password."}), 401
 
+        token = generate_token(user)
+
         return jsonify({
             "success": True,
+            "token": token,
             "user": {
                 "id": user["id"],
                 "fullname": user["fullname"],

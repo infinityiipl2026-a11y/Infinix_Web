@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { getProduct } from "../api/products";
+import { updateProduct } from "../services/api";
 
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [form, setForm] = useState({
     family: "",
@@ -22,9 +22,8 @@ const EditProduct = () => {
 
   const loadProduct = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:5000/product/${id}`);
-      const data = await response.json();
-      if (response.ok) {
+      const data = await getProduct(id);
+      if (data && !data.message) {
         setForm({
           family: data.family || "",
           name: data.name || "",
@@ -37,7 +36,7 @@ const EditProduct = () => {
           ingredients: data.ingredients || ""
         });
       } else {
-        setMessage(data.message || "Failed to load product.");
+        setMessage(data?.message || "Failed to load product.");
       }
     } catch (error) {
       console.log(error);
@@ -56,15 +55,7 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://127.0.0.1:5000/update-product/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-User-Role": user?.role || ""
-        },
-        body: JSON.stringify(form)
-      });
-      const data = await response.json();
+      const data = await updateProduct(id, form);
       if (data.success) {
         navigate("/admin");
       } else {

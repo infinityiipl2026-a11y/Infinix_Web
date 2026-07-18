@@ -1,319 +1,194 @@
 from flask import Blueprint, request, jsonify
 
 from config.mysql import get_db
+from utils.auth import admin_required, token_required
 
 order_bp = Blueprint("orders", __name__)
 
+VALID_STATUSES = {
+    "Pending", "Confirmed", "Packed", "Shipped", "Delivered", "Cancelled"
+}
+
 
 @order_bp.route("/place-order", methods=["POST"])
+@token_required
 def place_order():
 
     data = request.json or {}
 
     required_fields = [
-
-        "user_id",
-
-        "full_name",
-
-        "email",
-
-        "phone",
-
-        "address",
-
-        "city",
-
-        "state",
-
-        "pincode",
-
-        "payment_method"
-
+        "user_id", "full_name", "email", "phone",
+        "address", "city", "state", "pincode", "payment_method"
     ]
 
     for field in required_fields:
-
         if not data.get(field):
-
             return jsonify({
-
                 "success": False,
-
                 "message": f"{field} is required."
-
             }), 400
+
+    # A user can only place an order on their own behalf.
+    if (
+        request.current_user["role"] != "admin"
+        and request.current_user["id"] != int(data["user_id"])
+    ):
+        return jsonify({"success": False, "message": "Access denied."}), 403
 
     conn = None
     cursor = None
 
     try:
-
         conn = get_db()
-
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute(
-
             """
-            SELECT
-                c.product_id,
-                c.quantity,
-                p.price
+            SELECT c.product_id, c.quantity, p.price
             FROM cart c
-            JOIN products p
-            ON c.product_id = p.id
+            JOIN products p ON c.product_id = p.id
             WHERE c.user_id = %s
             """,
-
             (data["user_id"],)
-
         )
-
         cart_items = cursor.fetchall()
 
         if len(cart_items) == 0:
+            return jsonify({"success": False, "message": "Cart is empty."}), 400
 
-            return jsonify({
-
-                "success": False,
-
-                "message": "Cart is empty."
-
-            }), 400
-
-        total = 0
-
-        for item in cart_items:
-
-            total += item["price"] * item["quantity"]
+        total = sum(item["price"] * item["quantity"] for item in cart_items)
 
         cursor.execute(
-
             """
             INSERT INTO orders
-            (
-                user_id,
-                full_name,
-                email,
-                phone,
-                address,
-                city,
-                state,
-                pincode,
-                payment_method,
-                total
-            )
-            VALUES
-            (
-                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s
-            )
+            (user_id, full_name, email, phone, address, city, state,
+             pincode, payment_method, total)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """,
-
             (
-
-                data["user_id"],
-
-                data["full_name"],
-
-                data["email"],
-
-                data["phone"],
-
-                data["address"],
-
-                data["city"],
-
-                data["state"],
-
-                data["pincode"],
-
-                data["payment_method"],
-
-                total
-
+                data["user_id"], data["full_name"], data["email"], data["phone"],
+                data["address"], data["city"], data["state"], data["pincode"],
+                data["payment_method"], total
             )
-
         )
 
         order_id = cursor.lastrowid
 
         for item in cart_items:
-
             cursor.execute(
-
                 """
-                INSERT INTO order_items
-                (
-                    order_id,
-                    product_id,
-                    quantity,
-                    price
-                )
-                VALUES
-                (
-                    %s,%s,%s,%s
-                )
+                INSERT INTO order_items (order_id, product_id, quantity, price)
+                VALUES (%s,%s,%s,%s)
                 """,
-
-                (
-
-                    order_id,
-
-                    item["product_id"],
-
-                    item["quantity"],
-
-                    item["price"]
-
-                )
-
+                (order_id, item["product_id"], item["quantity"], item["price"])
             )
 
-        cursor.execute(
-
-            """
-            DELETE FROM cart
-            WHERE user_id=%s
-            """,
-
-            (data["user_id"],)
-
-        )
+        cursor.execute("DELETE FROM cart WHERE user_id=%s", (data["user_id"],))
 
         conn.commit()
 
         return jsonify({
-
             "success": True,
-
             "message": "Order placed successfully.",
-
             "order_id": order_id
-
         })
 
-    except Exception as e:
-
-        print(e)
-
-        return jsonify({
-
-            "success": False,
-
-            "message": str(e)
-
-        }), 500
+    except Exception as exc:
+        print("Place order error:", exc)
+        return jsonify({"success": False, "message": "Server error."}), 500
 
     finally:
-
         if cursor:
             cursor.close()
-
         if conn:
             conn.close()
 
 
 @order_bp.route("/my-orders/<int:user_id>", methods=["GET"])
+@token_required
 def my_orders(user_id):
+    # Previously unauthenticated — any visitor could view any customer's
+    # full order/PII history by guessing a user_id in the URL (IDOR).
+    if request.current_user["role"] != "admin" and request.current_user["id"] != user_id:
+        return jsonify({"success": False, "message": "Access denied."}), 403
 
-    conn = get_db()
-
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute(
-
-        """
-        SELECT *
-        FROM orders
-        WHERE user_id=%s
-        ORDER BY created_at DESC
-        """,
-
-        (user_id,)
-
-    )
-
-    orders = cursor.fetchall()
-
-    cursor.close()
-
-    conn.close()
-
-    return jsonify({
-
-        "success": True,
-
-        "orders": orders
-
-    })
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM orders WHERE user_id=%s ORDER BY created_at DESC",
+            (user_id,)
+        )
+        orders = cursor.fetchall()
+        return jsonify({"success": True, "orders": orders})
+    except Exception as exc:
+        print("My orders error:", exc)
+        return jsonify({"success": False, "message": "Server error."}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 @order_bp.route("/orders", methods=["GET"])
+@admin_required
 def all_orders():
-
-    conn = get_db()
-
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute(
-
-        """
-        SELECT *
-        FROM orders
-        ORDER BY created_at DESC
-        """
-
-    )
-
-    orders = cursor.fetchall()
-
-    cursor.close()
-
-    conn.close()
-
-    return jsonify({
-
-        "success": True,
-
-        "orders": orders
-
-    })
+    # Previously unauthenticated — this leaked every customer's name,
+    # email, phone, and address to anyone who hit the endpoint.
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM orders ORDER BY created_at DESC")
+        orders = cursor.fetchall()
+        return jsonify({"success": True, "orders": orders})
+    except Exception as exc:
+        print("All orders error:", exc)
+        return jsonify({"success": False, "message": "Server error."}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 @order_bp.route("/update-order-status/<int:order_id>", methods=["PUT"])
+@admin_required
 def update_order(order_id):
-
-    data = request.json
-
+    # Previously unauthenticated — anyone could change any order's status.
+    data = request.json or {}
     status = data.get("status")
 
-    conn = get_db()
+    if status not in VALID_STATUSES:
+        return jsonify({
+            "success": False,
+            "message": f"Status must be one of: {', '.join(sorted(VALID_STATUSES))}"
+        }), 400
 
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE orders SET status=%s WHERE id=%s",
+            (status, order_id)
+        )
+        conn.commit()
 
-    cursor.execute(
+        if cursor.rowcount == 0:
+            return jsonify({"success": False, "message": "Order not found."}), 404
 
-        """
-        UPDATE orders
-        SET status=%s
-        WHERE id=%s
-        """,
-
-        (status, order_id)
-
-    )
-
-    conn.commit()
-
-    cursor.close()
-
-    conn.close()
-
-    return jsonify({
-
-        "success": True,
-
-        "message": "Status updated."
-
-    })
+        return jsonify({"success": True, "message": "Status updated."})
+    except Exception as exc:
+        print("Update order error:", exc)
+        return jsonify({"success": False, "message": "Server error."}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()

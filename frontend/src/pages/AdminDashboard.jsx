@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { adminDashboard, deleteProduct } from "../services/api";
+import { resolveImageUrl } from "../config";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -9,13 +11,7 @@ const AdminDashboard = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/admin", {
-        headers: {
-          "Content-Type": "application/json",
-          "X-User-Role": user?.role || ""
-        }
-      });
-      const data = await response.json();
+      const data = await adminDashboard();
       if (data.success) {
         setProducts(data.products);
       } else {
@@ -49,11 +45,7 @@ const AdminDashboard = () => {
           products.map((product) => (
             <div className="admin-product-card" key={product.id}>
             <img
-              src={
-                product.image?.startsWith("/uploads")
-                  ? `http://127.0.0.1:5000${product.image}`
-                  : product.image
-              }
+              src={resolveImageUrl(product.image)}
               alt={product.name}
               style={{
                 width: "100%",
@@ -78,17 +70,7 @@ const AdminDashboard = () => {
                   onClick={async () => {
                     if (!window.confirm("Delete this product?")) return;
                     try {
-                      const response = await fetch(
-                        `http://127.0.0.1:5000/delete-product/${product.id}`,
-                        {
-                          method: "DELETE",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "X-User-Role": user?.role || ""
-                          }
-                        }
-                      );
-                      const data = await response.json();
+                      const data = await deleteProduct(product.id);
                       if (data.success) {
                         setProducts(products.filter((item) => item.id !== product.id));
                       } else {

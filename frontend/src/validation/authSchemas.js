@@ -52,10 +52,7 @@ export const registerSchema = z
     email: emailField,
     phone: phoneField,
     password: passwordField,
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-    terms: z.literal(true, {
-      errorMap: () => ({ message: "You must accept the Terms & Conditions" })
-    })
+    confirmPassword: z.string().min(1, "Please confirm your password")
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

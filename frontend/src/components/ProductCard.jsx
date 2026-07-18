@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { resolveImageUrl } from "../config";
 
 const ProductCard = ({ product }) => {
 
@@ -14,11 +15,7 @@ const ProductCard = ({ product }) => {
         <div className="product-img-box">
 
         <img
-          src={
-            product.image?.startsWith("/uploads")
-              ? `http://127.0.0.1:5000${product.image}`
-              : product.image
-          }
+          src={resolveImageUrl(product.image)}
           alt={product.name}
           className="product-image"
         />

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from config.mysql import get_db
+from utils.auth import token_required
 
 cart_bp = Blueprint("cart", __name__)
 
@@ -17,7 +18,12 @@ def format_cart_item(record):
     }
 
 
+def _forbidden():
+    return jsonify({"success": False, "message": "Access denied."}), 403
+
+
 @cart_bp.route("/add-cart", methods=["POST"])
+@token_required
 def add_cart():
     data = request.json or {}
     user_id = data.get("user_id")
@@ -26,6 +32,12 @@ def add_cart():
 
     if not user_id or not product_id:
         return jsonify({"success": False, "message": "Missing cart fields."}), 400
+
+    # A user may only add to their own cart. Previously user_id was taken
+    # straight from the request body with no check that it matched the
+    # caller, so anyone could add/read/modify anyone else's cart.
+    if request.current_user["role"] != "admin" and request.current_user["id"] != int(user_id):
+        return _forbidden()
 
     try:
         quantity = int(quantity)
@@ -81,7 +93,11 @@ def add_cart():
 
 
 @cart_bp.route("/cart/<int:user_id>", methods=["GET"])
+@token_required
 def get_cart(user_id):
+    if request.current_user["role"] != "admin" and request.current_user["id"] != user_id:
+        return _forbidden()
+
     conn = None
     cursor = None
 
@@ -107,6 +123,7 @@ def get_cart(user_id):
 
 
 @cart_bp.route("/cart/<int:item_id>", methods=["PUT"])
+@token_required
 def update_cart_item(item_id):
     data = request.json or {}
     quantity = data.get("quantity")
@@ -127,6 +144,18 @@ def update_cart_item(item_id):
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
+
+        # Ownership can only be verified by looking the row up first, since
+        # item_id alone doesn't tell us who it belongs to.
+        cursor.execute("SELECT user_id FROM cart WHERE id = %s", (item_id,))
+        owner = cursor.fetchone()
+
+        if not owner:
+            return jsonify({"success": False, "message": "Cart item not found."}), 404
+
+        if request.current_user["role"] != "admin" and request.current_user["id"] != owner["user_id"]:
+            return _forbidden()
+
         cursor.execute(
             "UPDATE cart SET quantity = %s WHERE id = %s",
             (quantity, item_id)
@@ -155,13 +184,24 @@ def update_cart_item(item_id):
 
 
 @cart_bp.route("/cart/<int:item_id>", methods=["DELETE"])
+@token_required
 def remove_cart(item_id):
     conn = None
     cursor = None
 
     try:
         conn = get_db()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT user_id FROM cart WHERE id = %s", (item_id,))
+        owner = cursor.fetchone()
+
+        if not owner:
+            return jsonify({"success": False, "message": "Cart item not found."}), 404
+
+        if request.current_user["role"] != "admin" and request.current_user["id"] != owner["user_id"]:
+            return _forbidden()
+
         cursor.execute("DELETE FROM cart WHERE id = %s", (item_id,))
         conn.commit()
         return jsonify({"success": True, "message": "Cart item removed."})
@@ -176,7 +216,11 @@ def remove_cart(item_id):
 
 
 @cart_bp.route("/clear-cart/<int:user_id>", methods=["DELETE"])
+@token_required
 def clear_cart(user_id):
+    if request.current_user["role"] != "admin" and request.current_user["id"] != user_id:
+        return _forbidden()
+
     conn = None
     cursor = None
 
