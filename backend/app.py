@@ -33,7 +33,8 @@ CORS(app, supports_credentials=True, origins=settings.CORS_ORIGINS)
 
 limiter.init_app(app)
 
-os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
+if not os.environ.get("VERCEL"):
+    os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
 
 # Schema bootstrap is opt-in outside local dev (see AUTO_CREATE_SCHEMA in
 # config/settings.py) — running "CREATE TABLE IF NOT EXISTS" on every single
