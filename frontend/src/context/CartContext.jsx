@@ -2,7 +2,9 @@
   createContext,
   useContext,
   useState,
-  useEffect
+  useEffect,
+  useCallback,
+  useMemo
 } from "react";
 import { useAuth } from "./AuthContext";
 import {
@@ -61,7 +63,7 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems, user]);
 
-  const addToCart = async (product, quantity = 1) => {
+  const addToCart = useCallback(async (product, quantity = 1) => {
     if (user) {
       try {
         const response = await addCartItem({
@@ -118,9 +120,9 @@ export const CartProvider = ({ children }) => {
         ];
       });
     }
-  };
+  }, [user]);
 
-  const increaseQuantity = async (id) => {
+  const increaseQuantity = useCallback(async (id) => {
     const item = cartItems.find((cartItem) => cartItem.id === id);
     if (!item) return;
 
@@ -147,9 +149,9 @@ export const CartProvider = ({ children }) => {
         )
       );
     }
-  };
+  }, [cartItems, user]);
 
-  const decreaseQuantity = async (id) => {
+  const decreaseQuantity = useCallback(async (id) => {
     const item = cartItems.find((cartItem) => cartItem.id === id);
     if (!item || item.quantity <= 1) return;
 
@@ -179,9 +181,9 @@ export const CartProvider = ({ children }) => {
         )
       );
     }
-  };
+  }, [cartItems, user]);
 
-  const removeItem = async (id) => {
+  const removeItem = useCallback(async (id) => {
     if (user) {
       try {
         const response = await removeCartItem(id);
@@ -198,9 +200,9 @@ export const CartProvider = ({ children }) => {
         prevItems.filter((item) => item.id !== id)
       );
     }
-  };
+  }, [user]);
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     if (user) {
       try {
         const response = await clearUserCart(user.id);
@@ -214,27 +216,44 @@ export const CartProvider = ({ children }) => {
       setCartItems([]);
       localStorage.removeItem("cart");
     }
-  };
+  }, [user]);
 
-  const cartTotal =
-    cartItems.reduce(
-      (total, item) =>
-        total + Number(item.price) * item.quantity,
-      0
-    );
+  const cartTotal = useMemo(
+    () =>
+      cartItems.reduce(
+        (total, item) =>
+          total + Number(item.price) * item.quantity,
+        0
+      ),
+    [cartItems]
+  );
+
+  // CartContext is consumed by the Navbar (cart badge count) on every page,
+  // so an unmemoized value here caused the whole app shell to re-render on
+  // every render of CartProvider, not just when the cart actually changed.
+  const value = useMemo(
+    () => ({
+      cartItems,
+      addToCart,
+      increaseQuantity,
+      decreaseQuantity,
+      removeItem,
+      clearCart,
+      cartTotal
+    }),
+    [
+      cartItems,
+      addToCart,
+      increaseQuantity,
+      decreaseQuantity,
+      removeItem,
+      clearCart,
+      cartTotal
+    ]
+  );
 
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        increaseQuantity,
-        decreaseQuantity,
-        removeItem,
-        clearCart,
-        cartTotal
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

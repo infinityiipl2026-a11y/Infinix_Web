@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 const AuthContext = createContext(null);
 
@@ -22,33 +22,41 @@ export const AuthProvider = ({ children }) => {
   // after login and getting a 401 back. Writing synchronously guarantees
   // the token is in localStorage before this call returns, regardless of
   // effect ordering.
-  const setUser = (value) => {
+  const setUser = useCallback((value) => {
     setUserState(value);
     if (value) {
       localStorage.setItem("user", JSON.stringify(value));
     } else {
       localStorage.removeItem("user");
     }
-  };
+  }, []);
 
-  const setToken = (value) => {
+  const setToken = useCallback((value) => {
     setTokenState(value);
     if (value) {
       localStorage.setItem("token", value);
     } else {
       localStorage.removeItem("token");
     }
-  };
+  }, []);
 
   // Convenience helper: clears both user and token together (used on
   // logout, or if a request comes back 401/session expired).
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-  };
+  }, [setUser, setToken]);
+
+  // Auth is read by Navbar, CartContext, AdminRoute, etc. all over the
+  // tree, so an unmemoized value object here would ripple re-renders
+  // everywhere on every render of AuthProvider.
+  const value = useMemo(
+    () => ({ user, setUser, token, setToken, logout }),
+    [user, setUser, token, setToken, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, setUser, token, setToken, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
