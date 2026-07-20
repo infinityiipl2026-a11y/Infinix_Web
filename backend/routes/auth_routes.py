@@ -11,7 +11,7 @@ from utils.auth import generate_token
 
 auth_bp = Blueprint("auth", __name__)
 
-EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+EMAIL_RE = re.compile(r"^[a-z0-9][a-z0-9._%+-]{1,29}@gmail\.com$")
 MIN_PASSWORD_LENGTH = 8
 
 
@@ -21,8 +21,16 @@ def register():
     data = request.json or {}
 
     fullname = data.get("fullname", "").strip()
-    email = data.get("email", "").strip().lower()
+    raw_email = data.get("email", "").strip()
     password = data.get("password", "")
+
+    if raw_email != raw_email.lower():
+        return jsonify({
+            "success": False,
+            "message": "Email must be in lowercase only."
+        }), 400
+
+    email = raw_email.lower()
     # phone is accepted from the redesigned Register form but not yet
     # persisted — add a `phone VARCHAR(15)` column to `users` (see
     # schema.sql) and an INSERT param below to store it.
@@ -32,7 +40,8 @@ def register():
         return jsonify({"success": False, "message": "All fields are required."}), 400
 
     if not EMAIL_RE.match(email):
-        return jsonify({"success": False, "message": "Enter a valid email address."}), 400
+        return jsonify({"success": False, "message": "Enter a valid Gmail address (e.g. name@gmail.com)."}), 400
+
 
     if len(password) < MIN_PASSWORD_LENGTH:
         return jsonify({

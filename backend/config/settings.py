@@ -96,6 +96,19 @@ AUTO_CREATE_SCHEMA = os.getenv(
 # ---------------------------------------------------------------------------
 # Rate limiting
 # ---------------------------------------------------------------------------
-# "memory://" only works correctly for a single-process server. Use a shared
-# store (e.g. Redis: redis://host:6379) once you run more than one worker.
+# "memory://" only works correctly for a single, long-lived process. On
+# Vercel (serverless) each invocation can land on a different instance with
+# its own memory, so a memory:// limiter does NOT reliably enforce limits
+# in production -- an attacker's requests just get spread across instances.
+# Point this at a shared store instead, e.g. Upstash Redis (integrates
+# natively with Vercel): RATE_LIMIT_STORAGE_URI=rediss://default:<password>@<host>:<port>
 RATE_LIMIT_STORAGE_URI = os.getenv("RATE_LIMIT_STORAGE_URI", "memory://")
+
+if IS_PRODUCTION and RATE_LIMIT_STORAGE_URI == "memory://":
+    print(
+        "WARNING: RATE_LIMIT_STORAGE_URI is not set in production. Falling "
+        "back to an in-memory limiter that does NOT work correctly across "
+        "serverless instances -- login/register rate limits are not "
+        "reliably enforced right now. Set RATE_LIMIT_STORAGE_URI to a "
+        "Redis URL (e.g. from Upstash) to fix this."
+    )

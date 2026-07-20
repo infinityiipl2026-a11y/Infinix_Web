@@ -54,6 +54,26 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(order_bp)
 
 
+@app.after_request
+def set_security_headers(response):
+    # This API only ever returns JSON, never renders HTML, so a strict CSP
+    # here costs nothing and blocks this origin from being used as an XSS
+    # payload host or embedded somewhere unexpected.
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = "default-src 'none'"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    if settings.IS_PRODUCTION:
+        # HSTS only makes sense once you're sure the site is always served
+        # over HTTPS (true on Vercel by default). max-age is 1 year here;
+        # lower it during initial rollout if you want an easy way back out.
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+    return response
+
+
 @app.route("/health")
 def health():
     return jsonify({"status": "ok"})
