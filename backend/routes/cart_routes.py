@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from config.mysql import get_db
+from config.db import get_db
 from utils.auth import token_required
 
 cart_bp = Blueprint("cart", __name__)
@@ -68,10 +68,10 @@ def add_cart():
             cart_item_id = existing_item["id"]
         else:
             cursor.execute(
-                "INSERT INTO cart (user_id, product_id, quantity) VALUES (%s, %s, %s)",
+                "INSERT INTO cart (user_id, product_id, quantity) VALUES (%s, %s, %s) RETURNING id",
                 (user_id, product_id, quantity)
             )
-            cart_item_id = cursor.lastrowid
+            cart_item_id = cursor.fetchone()["id"]
 
         conn.commit()
         cursor.execute(

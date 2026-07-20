@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from config.mysql import get_db
+from config.db import get_db
 from utils.auth import admin_required, token_required
 
 order_bp = Blueprint("orders", __name__)
@@ -64,6 +64,7 @@ def place_order():
             (user_id, full_name, email, phone, address, city, state,
              pincode, payment_method, total)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            RETURNING id
             """,
             (
                 data["user_id"], data["full_name"], data["email"], data["phone"],
@@ -72,7 +73,7 @@ def place_order():
             )
         )
 
-        order_id = cursor.lastrowid
+        order_id = cursor.fetchone()["id"]
 
         for item in cart_items:
             cursor.execute(

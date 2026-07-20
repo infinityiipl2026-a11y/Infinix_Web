@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from config.mysql import get_db
+from config.db import get_db
 from utils.auth import admin_required
 
 admin_bp = Blueprint("admin", __name__)

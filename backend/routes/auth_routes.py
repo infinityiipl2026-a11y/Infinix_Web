@@ -5,7 +5,7 @@ import bcrypt
 import secrets
 from flask import Blueprint, request, jsonify
 
-from config.mysql import get_db
+from config.db import get_db
 from extensions import limiter
 from utils.auth import generate_token
 
@@ -40,6 +40,8 @@ def register():
             "message": f"Password must be at least {MIN_PASSWORD_LENGTH} characters."
         }), 400
 
+    conn = None
+    cursor = None
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
@@ -205,6 +207,8 @@ def login():
     if not email or not password:
         return jsonify({"success": False, "message": "Email and password are required."}), 400
 
+    conn = None
+    cursor = None
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
