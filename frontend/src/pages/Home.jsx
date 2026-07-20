@@ -36,7 +36,7 @@ useEffect(() => {
 
     } catch (error) {
 
-      console.log(error);
+      console.error(error);
 
     }
 
@@ -90,6 +90,8 @@ useEffect(() => {
               src="/images/hero-banner.jpg"
               alt="Infinity Products"
               fetchpriority="high"
+              width="800"
+              height="600"
             />
 
           </div>
@@ -147,8 +149,6 @@ useEffect(() => {
           <img
             src="/images/categories/household.png"
             alt="Household & Hygiene"
-            loading="lazy"
-            decoding="async"
           />
 
         </div>
@@ -171,8 +171,6 @@ useEffect(() => {
           <img
             src="/images/categories/personal.png"
             alt="Personal Care"
-            loading="lazy"
-            decoding="async"
           />
 
         </div>
@@ -195,8 +193,6 @@ useEffect(() => {
           <img
             src="/images/categories/fragrance.png"
             alt="Fragrance & Grooming"
-            loading="lazy"
-            decoding="async"
           />
 
         </div>
@@ -263,8 +259,6 @@ useEffect(() => {
             <img
               src="/images/Infinix Product Images/Gel/Aloevera.jpg"
               alt="Aloe Vera Gel"
-              loading="lazy"
-              decoding="async"
             />
 
           </div>

@@ -564,6 +564,7 @@ a {
   width: 100%;
   display: block;
   height: auto;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
@@ -1087,23 +1088,26 @@ a {
     height: 220px;
   }
 
+}
+
+/* NOTE: the .products-grid breakpoints below used to be duplicated across
+   six separate media query blocks in a conflicting order -- since rules of
+   equal specificity are resolved by source order (not by which range is
+   "more specific"), the last matching block always won regardless of
+   viewport width. At ~426px wide, that meant the 1100px block's
+   `repeat(3, 1fr)` was overriding the 768px block's `repeat(2, 1fr)`,
+   silently forcing 3 columns into a viewport only wide enough for 2 and
+   causing the horizontal overflow/cut-off cards. Consolidated into one
+   clean, non-conflicting set below, ordered widest-to-narrowest. */
+@media (max-width: 1100px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-
-}
-
-@media (max-width:1100px) {
-  .products-grid {
-    grid-template-columns: repeat(3,1fr);
-  }
-
-}
-
-@media (max-width:768px) {
-  .products-grid {
-    grid-template-columns: repeat(2,1fr);
     gap: 14px;
   }
 
@@ -1115,28 +1119,12 @@ a {
   .price {
     font-size: 20px;
   }
-
-}
-
-@media (max-width:380px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
-
-}
-
-@media (max-width: 1100px) {
-  .products-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
 }
 
 @media (max-width: 380px) {
   .products-grid {
     grid-template-columns: 1fr;
   }
-
 }
 
 /* =========================================================
@@ -2480,4 +2468,11 @@ a {
     text-align: center;
   }
 
+}
+
+/* Lazy-loaded route fallback (see App.js Suspense) -- keeps a reasonable
+   minimum height while a chunk downloads, instead of the page collapsing
+   to nothing and then jumping once the route renders. */
+.route-loading {
+  min-height: 60vh;
 }

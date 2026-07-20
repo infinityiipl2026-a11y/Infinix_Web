@@ -18,7 +18,7 @@ const AdminDashboard = () => {
         setMessage(data.message || "Unable to fetch products.");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setMessage("Server error.");
     }
   };
@@ -53,7 +53,7 @@ const AdminDashboard = () => {
                 objectFit: "contain"
               }}
               onError={(e) => {
-                console.log("Image failed:", product.image);
+                console.warn("Image failed to load:", product.image);
               }}
             />
               <h3>{product.name}</h3>
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
                         setMessage(data.message || "Delete failed.");
                       }
                     } catch (error) {
-                      console.log(error);
+                      console.error(error);
                       setMessage("Server error.");
                     }
                   }}

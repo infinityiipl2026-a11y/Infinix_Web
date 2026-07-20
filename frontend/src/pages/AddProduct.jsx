@@ -102,7 +102,7 @@ const AddProduct = () => {
 
     } catch (error) {
 
-      console.log(error);
+      console.error(error);
 
       setMessage(
         "Server Error"

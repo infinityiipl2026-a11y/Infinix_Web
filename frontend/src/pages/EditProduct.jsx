@@ -39,7 +39,7 @@ const EditProduct = () => {
         setMessage(data?.message || "Failed to load product.");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setMessage("Server error.");
     }
   };
@@ -62,7 +62,7 @@ const EditProduct = () => {
         setMessage(data.message || "Failed to update product.");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setMessage("Server error.");
     }
   };

@@ -8,10 +8,53 @@
     content="width=device-width, initial-scale=1"
   />
 
+  <!--
+    Placeholder copy -- swap in your real tagline/description. This is
+    what shows up in Google search results and when the link is shared
+    on WhatsApp/social media, so it's worth being deliberate about it.
+  -->
+  <meta
+    name="description"
+    content="Infinix — household, personal care, and fragrance products."
+  />
+  <meta name="theme-color" content="#000000" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Infinix" />
+  <meta
+    property="og:description"
+    content="Infinix — household, personal care, and fragrance products."
+  />
+  <meta property="og:image" content="%PUBLIC_URL%/logo1.png" />
+  <meta property="og:url" content="https://infinix-web-mlpx.vercel.app/" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Infinix" />
+  <meta
+    name="twitter:description"
+    content="Infinix — household, personal care, and fragrance products."
+  />
+  <meta name="twitter:image" content="%PUBLIC_URL%/logo1.png" />
+
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
   <link
     rel="icon"
     type="image/png"
     href="%PUBLIC_URL%/logo1.png"
+  />
+
+  <!--
+    Preloads the homepage hero image, which is the Largest Contentful
+    Paint element on "/". Without this, the browser only discovers it
+    after parsing the HTML/CSS, adding an avoidable delay to LCP.
+    If the hero image is ever changed to something other than
+    hero-banner.jpg, update this path too.
+  -->
+  <link
+    rel="preload"
+    as="image"
+    href="%PUBLIC_URL%/images/hero-banner.jpg"
   />
     <link
     rel="preconnect"
@@ -23,9 +66,13 @@
     crossorigin
   >
   <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   >
+  <link
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+  rel="stylesheet"
+>
 
   <title>Infinix</title>
 

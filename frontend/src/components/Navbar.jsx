@@ -43,7 +43,7 @@ const cartCount = cartItems.reduce(
     try {
       // Preserve cart items in MySQL for this user on logout.
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
 
     logout();
@@ -86,7 +86,7 @@ const handleSearch = () => {
 
           <img
             src="/images/logo1.png"
-            alt="Logo"
+            alt="Infinix"
             className="nav-logo"
           />
 
@@ -182,7 +182,7 @@ const handleSearch = () => {
 
           <img
             src="/images/logo2.png"
-            alt="Logo"
+            alt="Infinix"
             className="nav-logo"
           />
 

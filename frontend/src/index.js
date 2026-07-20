@@ -13,6 +13,7 @@ import {
 } from "./context/SearchContext";
 
 import { AuthProvider } from "./context/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const root =
   ReactDOM.createRoot(
@@ -22,19 +23,23 @@ const root =
 root.render(
   <React.StrictMode>
 
-    <AuthProvider>
+    <ErrorBoundary>
 
-      <CartProvider>
+      <AuthProvider>
 
-        <SearchProvider>
+        <CartProvider>
 
-          <App />
+          <SearchProvider>
 
-        </SearchProvider>
+            <App />
 
-      </CartProvider>
+          </SearchProvider>
 
-    </AuthProvider>
+        </CartProvider>
+
+      </AuthProvider>
+
+    </ErrorBoundary>
 
   </React.StrictMode>
 );

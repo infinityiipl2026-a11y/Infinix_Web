@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { memo } from "react";
 import { resolveImageUrl } from "../config";
 
 const ProductCard = ({ product }) => {
@@ -20,7 +19,8 @@ const ProductCard = ({ product }) => {
           alt={product.name}
           className="product-image"
           loading="lazy"
-          decoding="async"
+          width="400"
+          height="400"
         />
 
         </div>
@@ -61,7 +61,4 @@ const ProductCard = ({ product }) => {
 
 };
 
-// Product grids can render dozens of cards; memoizing means a card only
-// re-renders when its own product prop actually changes, instead of every
-// card re-rendering whenever the parent list (Home, Shop) re-renders.
-export default memo(ProductCard);
+export default ProductCard;

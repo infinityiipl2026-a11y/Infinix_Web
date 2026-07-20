@@ -25,6 +25,26 @@ const authHeaders = (includeJson = true) => {
   return headers;
 };
 
+// Wraps fetch() for authenticated endpoints only (ones sending an
+// Authorization header). If the backend responds 401 -- expired or
+// invalid token -- this clears the stored session and sends the user to
+// /login, instead of leaving them on a page that silently keeps failing
+// every request. Deliberately NOT used for /login itself: a wrong
+// password there also returns 401, and treating that as "session
+// expired, redirect to /login" would just reload the login page the
+// user is already on.
+const authFetch = async (url, options) => {
+  const response = await fetch(url, options);
+
+  if (response.status === 401 && !window.location.pathname.startsWith("/login")) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  }
+
+  return response;
+};
+
 /* ===========================
    AUTH API
 =========================== */
@@ -83,7 +103,7 @@ export const fetchProduct = async (id) => {
 // Don't set Content-Type manually here — the browser needs to set it
 // itself so it can include the multipart boundary.
 export const addProduct = async (formData) => {
-  const response = await fetch(`${API_BASE_URL}/add-product`, {
+  const response = await authFetch(`${API_BASE_URL}/add-product`, {
     method: "POST",
     headers: authHeaders(false),
     body: formData
@@ -92,7 +112,7 @@ export const addProduct = async (formData) => {
 };
 
 export const updateProduct = async (id, product) => {
-  const response = await fetch(`${API_BASE_URL}/update-product/${id}`, {
+  const response = await authFetch(`${API_BASE_URL}/update-product/${id}`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify(product)
@@ -101,7 +121,7 @@ export const updateProduct = async (id, product) => {
 };
 
 export const deleteProduct = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/delete-product/${id}`, {
+  const response = await authFetch(`${API_BASE_URL}/delete-product/${id}`, {
     method: "DELETE",
     headers: authHeaders(false)
   });
@@ -109,7 +129,7 @@ export const deleteProduct = async (id) => {
 };
 
 export const adminDashboard = async () => {
-  const response = await fetch(`${API_BASE_URL}/admin`, {
+  const response = await authFetch(`${API_BASE_URL}/admin`, {
     headers: authHeaders(false)
   });
   return response.json();
@@ -120,14 +140,14 @@ export const adminDashboard = async () => {
 =========================== */
 
 export const getCart = async (userId) => {
-  const response = await fetch(`${API_BASE_URL}/cart/${userId}`, {
+  const response = await authFetch(`${API_BASE_URL}/cart/${userId}`, {
     headers: authHeaders(false)
   });
   return response.json();
 };
 
 export const addCartItem = async (payload) => {
-  const response = await fetch(`${API_BASE_URL}/add-cart`, {
+  const response = await authFetch(`${API_BASE_URL}/add-cart`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(payload)
@@ -136,7 +156,7 @@ export const addCartItem = async (payload) => {
 };
 
 export const updateCartItem = async (itemId, quantity) => {
-  const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
+  const response = await authFetch(`${API_BASE_URL}/cart/${itemId}`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify({ quantity })
@@ -145,7 +165,7 @@ export const updateCartItem = async (itemId, quantity) => {
 };
 
 export const removeCartItem = async (itemId) => {
-  const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
+  const response = await authFetch(`${API_BASE_URL}/cart/${itemId}`, {
     method: "DELETE",
     headers: authHeaders(false)
   });
@@ -153,7 +173,7 @@ export const removeCartItem = async (itemId) => {
 };
 
 export const clearUserCart = async (userId) => {
-  const response = await fetch(`${API_BASE_URL}/clear-cart/${userId}`, {
+  const response = await authFetch(`${API_BASE_URL}/clear-cart/${userId}`, {
     method: "DELETE",
     headers: authHeaders(false)
   });
@@ -165,7 +185,7 @@ export const clearUserCart = async (userId) => {
 =========================== */
 
 export const placeOrder = async (payload) => {
-  const response = await fetch(`${API_BASE_URL}/place-order`, {
+  const response = await authFetch(`${API_BASE_URL}/place-order`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(payload)
@@ -174,21 +194,21 @@ export const placeOrder = async (payload) => {
 };
 
 export const getMyOrders = async (userId) => {
-  const response = await fetch(`${API_BASE_URL}/my-orders/${userId}`, {
+  const response = await authFetch(`${API_BASE_URL}/my-orders/${userId}`, {
     headers: authHeaders(false)
   });
   return response.json();
 };
 
 export const getAllOrders = async () => {
-  const response = await fetch(`${API_BASE_URL}/orders`, {
+  const response = await authFetch(`${API_BASE_URL}/orders`, {
     headers: authHeaders(false)
   });
   return response.json();
 };
 
 export const updateOrderStatus = async (orderId, status) => {
-  const response = await fetch(`${API_BASE_URL}/update-order-status/${orderId}`, {
+  const response = await authFetch(`${API_BASE_URL}/update-order-status/${orderId}`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify({ status })
