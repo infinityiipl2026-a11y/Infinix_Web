@@ -1,4 +1,126 @@
+import { useState } from "react";
+
+// Base URL of the Flask API. Configure via VITE_API_URL in your frontend
+// .env (falls back to localhost for local development).
+const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+
+const NAME_RE = /^[A-Za-z\s]{2,50}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const INITIAL_FORM = {
+  name: "",
+  email: "",
+  subject: "",
+  message: "",
+};
+
+function validateField(name, value) {
+  const trimmed = value.trim();
+
+  switch (name) {
+    case "name":
+      if (!trimmed) return "Name is required.";
+      if (!NAME_RE.test(trimmed)) {
+        return "Name must be 2-50 characters and contain only letters and spaces.";
+      }
+      return "";
+
+    case "email":
+      if (!trimmed) return "Email is required.";
+      if (!EMAIL_RE.test(trimmed)) return "Enter a valid email address.";
+      return "";
+
+    case "subject":
+      if (!trimmed) return "Subject is required.";
+      if (trimmed.length < 5 || trimmed.length > 100) {
+        return "Subject must be 5-100 characters.";
+      }
+      return "";
+
+    case "message":
+      if (!trimmed) return "Message is required.";
+      if (trimmed.length < 10 || trimmed.length > 1000) {
+        return "Message must be 10-1000 characters.";
+      }
+      return "";
+
+    default:
+      return "";
+  }
+}
+
+function validateForm(form) {
+  const errors = {};
+  Object.keys(form).forEach((field) => {
+    const error = validateField(field, form[field]);
+    if (error) errors[field] = error;
+  });
+  return errors;
+}
+
 const Contact = () => {
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState("idle"); // idle | sending | success | error
+  const [statusMessage, setStatusMessage] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+
+    // Re-validate this field as the user types once it's already been
+    // flagged, so the inline error clears as soon as it's fixed.
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const validationErrors = validateForm(form);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      setStatus("error");
+      setStatusMessage("Please fix the highlighted fields.");
+      return;
+    }
+
+    setStatus("sending");
+    setStatusMessage("");
+
+    try {
+      const response = await fetch(`${API_URL}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        if (data.errors) setErrors(data.errors);
+        setStatus("error");
+        setStatusMessage(data.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      setStatus("success");
+      setStatusMessage(data.message || "Thanks for reaching out! We'll get back to you soon.");
+      setForm(INITIAL_FORM);
+      setErrors({});
+    } catch (err) {
+      setStatus("error");
+      setStatusMessage("Network error. Please check your connection and try again.");
+    }
+  };
+
   return (
     <div className="container section">
 
@@ -136,34 +258,75 @@ const Contact = () => {
 
         <div>
 
-          <form className="contact-form">
+          <form className="contact-form" onSubmit={handleSubmit} noValidate>
 
             <input
               type="text"
+              name="name"
               placeholder="Your Name"
+              value={form.name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={status === "sending"}
             />
+            {errors.name && (
+              <p className="field-error">{errors.name}</p>
+            )}
 
             <input
               type="email"
+              name="email"
               placeholder="Email Address"
+              value={form.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={status === "sending"}
             />
+            {errors.email && (
+              <p className="field-error">{errors.email}</p>
+            )}
 
             <input
               type="text"
+              name="subject"
               placeholder="Subject"
+              value={form.subject}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={status === "sending"}
             />
+            {errors.subject && (
+              <p className="field-error">{errors.subject}</p>
+            )}
 
             <textarea
               rows="6"
+              name="message"
               placeholder="Your Message"
+              value={form.message}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={status === "sending"}
             />
+            {errors.message && (
+              <p className="field-error">{errors.message}</p>
+            )}
 
             <button
               type="submit"
               className="btn"
+              disabled={status === "sending"}
             >
-              Send Message
+              {status === "sending" ? "Sending..." : "Send Message"}
             </button>
+
+            {status === "success" && (
+              <p className="form-success">{statusMessage}</p>
+            )}
+
+            {status === "error" && statusMessage && (
+              <p className="form-error">{statusMessage}</p>
+            )}
 
           </form>
 

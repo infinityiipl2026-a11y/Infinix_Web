@@ -96,11 +96,11 @@ const Footer = () => {
           </h4>
 
           <p>
-            🌐 www.infinitycpd.in
+            www.infinitycpd.in
           </p>
 
           <p>
-            ✉ info@infinitycpd.in
+            info@infinitycpd.in
           </p>
 
 <div className="footer-social">

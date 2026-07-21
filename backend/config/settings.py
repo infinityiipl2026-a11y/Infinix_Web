@@ -112,3 +112,24 @@ if IS_PRODUCTION and RATE_LIMIT_STORAGE_URI == "memory://":
         "reliably enforced right now. Set RATE_LIMIT_STORAGE_URI to a "
         "Redis URL (e.g. from Upstash) to fix this."
     )
+
+# ---------------------------------------------------------------------------
+# SMTP / contact form email
+# ---------------------------------------------------------------------------
+# Credentials are read only from the environment (.env locally) -- never
+# hardcoded. No insecure defaults are provided for SMTP_USER/SMTP_PASSWORD.
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+# Address shown in the "From" header (defaults to the authenticated user).
+SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USER)
+# Where contact-form submissions are delivered.
+CONTACT_RECEIVER_EMAIL = os.getenv("CONTACT_RECEIVER_EMAIL", "hrmanager@einfinity.in")
+
+if IS_PRODUCTION and not (SMTP_USER and SMTP_PASSWORD):
+    print(
+        "WARNING: SMTP_USER / SMTP_PASSWORD are not set. The /contact "
+        "endpoint will not be able to send emails until these are "
+        "configured in the environment."
+    )

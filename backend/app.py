@@ -10,6 +10,7 @@ from models.db_init import initialize_database
 from routes.admin_routes import admin_bp
 from routes.auth_routes import auth_bp
 from routes.cart_routes import cart_bp
+from routes.contact_routes import contact_bp
 from routes.order_routes import order_bp
 from routes.product_routes import product_bp
 
@@ -52,6 +53,7 @@ app.register_blueprint(product_bp)
 app.register_blueprint(cart_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(order_bp)
+app.register_blueprint(contact_bp)
 
 
 @app.after_request
