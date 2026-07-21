@@ -2,7 +2,8 @@ import { useState } from "react";
 
 // Base URL of the Flask API. Configure via VITE_API_URL in your frontend
 // .env (falls back to localhost for local development).
-const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env?.VITE_API_URL || "https://infinix-web.vercel.app";
+// const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
 
 const NAME_RE = /^[A-Za-z\s]{2,50}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
