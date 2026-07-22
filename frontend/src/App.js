@@ -27,6 +27,8 @@ import NotFound from "./pages/NotFound";
 // in the bundle every regular shopper downloads on their first visit.
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminOrders = lazy(() => import("./pages/AdminOrders"));
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const AddProduct = lazy(() => import("./pages/AddProduct"));
 const EditProduct = lazy(() => import("./pages/EditProduct"));
 
@@ -59,6 +61,14 @@ function App() {
               <Route
                 path="/admin"
                 element={<AdminRoute><AdminDashboard /></AdminRoute>}
+              />
+              <Route
+                path="/admin/orders"
+                element={<AdminRoute><AdminOrders /></AdminRoute>}
+              />
+              <Route
+                path="/admin/analytics"
+                element={<AdminRoute><AdminAnalytics /></AdminRoute>}
               />
               <Route
                 path="/add-product"

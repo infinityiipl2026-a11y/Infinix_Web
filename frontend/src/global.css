@@ -2251,6 +2251,82 @@ a {
   transform: translateY(-1px);
 }
 
+/* ---------------------------------------------------------
+   Admin sub-nav (Products / Orders / Analytics)
+--------------------------------------------------------- */
+.admin-subnav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.admin-subnav-link {
+  padding: 10px 18px;
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-bottom: none;
+  transition: color .2s ease, background .2s ease;
+}
+
+.admin-subnav-link:hover {
+  color: var(--primary);
+  background: var(--bg-color);
+}
+
+.admin-subnav-link.active {
+  color: var(--primary);
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+/* ---------------------------------------------------------
+   Order cards (used on both the customer Dashboard and
+   the Admin Orders page)
+--------------------------------------------------------- */
+.dashboard-profile {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.dashboard-profile p {
+  margin: 4px 0;
+}
+
+.orders-list,
+.admin-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.order-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(260px,1fr));

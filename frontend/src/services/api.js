@@ -207,6 +207,13 @@ export const getAllOrders = async () => {
   return response.json();
 };
 
+export const getAdminAnalytics = async () => {
+  const response = await authFetch(`${API_BASE_URL}/admin/analytics`, {
+    headers: authHeaders(false)
+  });
+  return response.json();
+};
+
 export const updateOrderStatus = async (orderId, status) => {
   const response = await authFetch(`${API_BASE_URL}/update-order-status/${orderId}`, {
     method: "PUT",

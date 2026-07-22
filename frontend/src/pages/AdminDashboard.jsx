@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { adminDashboard, deleteProduct } from "../services/api";
 import { resolveImageUrl } from "../config";
+import AdminNav from "../components/AdminNav";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ const AdminDashboard = () => {
   return (
     <div className="container section">
       <h1>Admin Dashboard</h1>
+      <AdminNav />
       {message && <p style={{ color: "red" }}>{message}</p>}
       <div className="admin-actions">
         <Link className="btn" to="/add-product">
