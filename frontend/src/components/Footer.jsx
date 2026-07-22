@@ -95,13 +95,21 @@ const Footer = () => {
             Contact Us
           </h4>
 
-          <p>
-            www.infinitycpd.in
-          </p>
+<p>
+  <a
+    href="https://www.infinitycpd.in"
+    target="_blank"
+    rel="noreferrer"
+  >
+    www.infinitycpd.in
+  </a>
+</p>
 
-          <p>
-            info@infinitycpd.in
-          </p>
+<p>
+  <a href="mailto:support@infinitycpd.in">
+    support@infinitycpd.in
+  </a>
+</p>
 
 <div className="footer-social">
 

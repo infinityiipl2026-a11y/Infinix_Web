@@ -127,95 +127,48 @@ const Contact = () => {
 
       <div className="contact-grid">
 
-        {/* LEFT SIDE */}
+{/* LEFT SIDE */}
 
-        <div className="contact-info">
+<div className="contact-info">
+  <h2>Get In Touch</h2>
 
-          <h2>Get In Touch</h2>
+  <p>
+    We'd love to hear from you. Reach out for product inquiries,
+    business opportunities, franchise partnerships, or customer support.
+  </p>
 
-          <p>
-            We'd love to hear from you. Reach out for
-            product inquiries, business opportunities,
-            franchise partnerships, or customer support.
-          </p>
+  <div className="contact-box">
+    <h3>Email</h3>
 
-          <div className="contact-box">
+    <p>
+      <a href="mailto:support@infinitycpd.in">
+        support@infinitycpd.in
+      </a>
+    </p>
+  </div>
 
-            <h3>Email</h3>
+  <div className="contact-box">
+    <h3>Telephone</h3>
 
-            <p>
-              <a href="mailto:info@einfinity.in">
-                info@einfinity.in
-              </a>
-            </p>
+<p>
+  <a href="tel:+912240462288">
+    +91 22 4046 2288
+  </a>
+</p>
+  </div>
 
-            <p>
-              <a href="mailto:sales@einfinity.in">
-                sales@einfinity.in
-              </a>
-            </p>
+  <div className="contact-box">
+    <h3>Head Office</h3>
 
-          </div>
-
-          <div className="contact-box">
-
-            <h3>Telephone</h3>
-
-            <p>
-              <a href="tel:+912240462288">
-                +91 22 4046 2288
-              </a>
-            </p>
-
-            <p>
-              <a href="tel:+912222672288">
-                +91 22 2267 2288
-              </a>
-            </p>
-
-          </div>
-
-          <div className="contact-box">
-
-            <h3>WhatsApp</h3>
-
-            <a
-              href="https://wa.me/919920542288"
-              target="_blank"
-              rel="noreferrer"
-            >
-              +91 99205 42288
-            </a>
-
-          </div>
-
-          <div className="contact-box">
-
-            <h3>Mumbai Office</h3>
-
-            <p>
-              1st Floor, Haroon House,
-              294 Perin Nariman Street,
-              Opp. RBI,
-              Kala Ghoda, Fort,
-              Mumbai - 400001
-            </p>
-
-          </div>
-
-          <div className="contact-box">
-
-            <h3>Delhi Branch</h3>
-
-            <p>
-              2nd Floor, 79 Shyam Lal Road,
-              Daryaganj,
-              New Delhi - 110002
-            </p>
-
-          </div>
-
-          <div className="social-links">
+    <p>
+      1st Floor, Haroon House,<br />
+      294, Perin Nariman St,<br />
+      Opposite Reserve Bank Of India,<br />
+      Fort, Mumbai,<br />
+      Maharashtra 400001
+    </p>
+  </div>
+            <div className="contact-box">
 
             <h3>Follow Us</h3>
 
@@ -248,8 +201,7 @@ const Contact = () => {
             </a>
 
           </div>
-
-        </div>
+</div>
 
         {/* RIGHT SIDE */}
 
