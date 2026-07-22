@@ -9,7 +9,7 @@ const STATUS_COLORS = {
   Packed: "#6c71c4",
   Shipped: "#2aa198",
   Delivered: "#2e7d32",
-  Cancelled: "#c0392b"
+  Cancelled: "#c0392b",
 };
 
 const Dashboard = () => {
@@ -29,6 +29,7 @@ const Dashboard = () => {
     const loadOrders = async () => {
       try {
         const data = await getMyOrders(user.id);
+
         if (data.success) {
           setOrders(data.orders || []);
         } else {
@@ -54,8 +55,12 @@ const Dashboard = () => {
       <h1 className="page-title">My Account</h1>
 
       <div className="dashboard-profile">
-        <p><strong>Name:</strong> {user.fullname}</p>
-        <p><strong>Email:</strong> {user.email}</p>
+        <p>
+          <strong>Name:</strong> {user.fullname}
+        </p>
+        <p>
+          <strong>Email:</strong> {user.email}
+        </p>
       </div>
 
       <h2 className="page-title" style={{ marginTop: "2rem" }}>
@@ -68,40 +73,82 @@ const Dashboard = () => {
         <p style={{ color: "red" }}>{message}</p>
       ) : orders.length === 0 ? (
         <p>
-          You haven&apos;t placed any orders yet.{" "}
-          <Link to="/shop" className="auth-link">Start shopping</Link>.
+          You haven't placed any orders yet.{" "}
+          <Link to="/shop" className="auth-link">
+            Start shopping
+          </Link>
+          .
         </p>
       ) : (
         <div className="orders-list">
           {orders.map((order) => (
             <div key={order.id} className="order-card">
               <div className="order-card-header">
-                <span>Order #{order.id}</span>
+                <span>
+                  <strong>
+                    Order{" "}
+                    {`ORD-${new Date(order.created_at).getFullYear()}-${String(
+                      order.id
+                    ).padStart(6, "0")}`}
+                  </strong>
+                </span>
+
                 <span
                   style={{
                     color: STATUS_COLORS[order.status] || "#555",
-                    fontWeight: 600
+                    fontWeight: 600,
                   }}
                 >
                   {order.status || "Pending"}
                 </span>
               </div>
+
               <p>
                 <strong>Placed:</strong>{" "}
                 {order.created_at
-                  ? new Date(order.created_at).toLocaleString()
+                  ? new Date(order.created_at).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
                   : "—"}
               </p>
+
               <p>
-                <strong>Total:</strong> ₹{Number(order.total).toFixed(2)}
+                <strong>Total:</strong> ₹
+                {Number(order.total).toLocaleString("en-IN", {
+                  minimumFractionDigits: 2,
+                })}
               </p>
+
               <p>
-                <strong>Delivering to:</strong> {order.address}, {order.city},{" "}
-                {order.state} - {order.pincode}
+                <strong>Delivering to:</strong>
+                <br />
+                {order.city}, {order.state}
               </p>
+
               <p>
                 <strong>Payment:</strong> {order.payment_method}
               </p>
+
+              {order.items && order.items.length > 0 && (
+                <div style={{ marginTop: "1rem" }}>
+                  <strong>Items:</strong>
+
+                  <ul
+                    style={{
+                      marginTop: "0.5rem",
+                      paddingLeft: "1.25rem",
+                    }}
+                  >
+                    {order.items.map((item, index) => (
+                      <li key={index}>
+                        {item.product_name} × {item.quantity}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -121,7 +121,9 @@ const AdminOrders = () => {
                   onClick={() => setExpandedId(isExpanded ? null : order.id)}
                 >
                   <span>
-                    <strong>Order #{order.id}</strong>
+                  <strong>
+                    Order {`ORD-${new Date(order.created_at).getFullYear()}-${String(order.id).padStart(6, "0")}`}
+                  </strong>
                     {" — "}
                     {order.full_name} ({order.email})
                   </span>

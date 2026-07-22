@@ -108,25 +108,66 @@ def place_order():
 @order_bp.route("/my-orders/<int:user_id>", methods=["GET"])
 @token_required
 def my_orders(user_id):
-    # Previously unauthenticated — any visitor could view any customer's
-    # full order/PII history by guessing a user_id in the URL (IDOR).
     if request.current_user["role"] != "admin" and request.current_user["id"] != user_id:
         return jsonify({"success": False, "message": "Access denied."}), 403
 
     conn = None
     cursor = None
+
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
+
         cursor.execute(
             "SELECT * FROM orders WHERE user_id=%s ORDER BY created_at DESC",
             (user_id,)
         )
         orders = cursor.fetchall()
-        return jsonify({"success": True, "orders": orders})
+
+        if orders:
+            order_ids = tuple(order["id"] for order in orders)
+
+            cursor.execute(
+                """
+                SELECT
+                    oi.order_id,
+                    oi.product_id,
+                    oi.quantity,
+                    oi.price,
+                    p.name AS product_name
+                FROM order_items oi
+                LEFT JOIN products p
+                    ON oi.product_id = p.id
+                WHERE oi.order_id IN %s
+                """,
+                (order_ids,)
+            )
+
+            items_by_order = {}
+
+            for row in cursor.fetchall():
+                items_by_order.setdefault(row["order_id"], []).append({
+                    "product_id": row["product_id"],
+                    "product_name": row["product_name"] or "Deleted Product",
+                    "quantity": row["quantity"],
+                    "price": row["price"]
+                })
+
+            for order in orders:
+                order["items"] = items_by_order.get(order["id"], [])
+
+        return jsonify({
+            "success": True,
+            "orders": orders
+        })
+
     except Exception as exc:
         print("My orders error:", exc)
-        return jsonify({"success": False, "message": "Server error."}), 500
+        return jsonify({
+            "success": False,
+            "message": "Server error."
+        }), 500
+
     finally:
         if cursor:
             cursor.close()

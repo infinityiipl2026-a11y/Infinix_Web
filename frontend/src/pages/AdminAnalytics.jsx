@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { getAdminAnalytics } from "../services/api";
 import AdminNav from "../components/AdminNav";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 const STATUS_COLORS = {
   Pending: "#b58900",
@@ -134,45 +144,120 @@ const AdminAnalytics = () => {
             </div>
           </div>
 
-          {/* DAILY TREND */}
-          <div style={{ marginTop: "2rem" }}>
-            <h3>Orders — Last 30 Days</h3>
-            {data.daily_trend.length === 0 ? (
-              <p>No orders in the last 30 days.</p>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-end",
-                  gap: "4px",
-                  height: "160px",
-                  borderBottom: "1px solid #ddd",
-                  padding: "0 0.5rem"
-                }}
-              >
-                {data.daily_trend.map((day) => {
-                  const maxCount = Math.max(...data.daily_trend.map((d) => d.order_count), 1);
-                  const heightPct = (day.order_count / maxCount) * 100;
-                  return (
-                    <div
-                      key={day.day}
-                      title={`${day.day}: ${day.order_count} orders, ₹${Number(day.revenue).toFixed(2)}`}
-                      style={{
-                        flex: 1,
-                        minWidth: "6px",
-                        height: `${Math.max(heightPct, 4)}%`,
-                        background: "#6c71c4",
-                        borderRadius: "3px 3px 0 0"
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            )}
-            <p style={{ color: "#777", fontSize: "0.85rem", marginTop: "0.5rem" }}>
-              Hover a bar to see that day&apos;s order count and revenue.
-            </p>
-          </div>
+{/* DAILY TREND */}
+{/* DAILY TREND */}
+<div
+  style={{
+    marginTop: "2rem",
+    background: "#fff",
+    border: "1px solid #eee",
+    borderRadius: "12px",
+    padding: "1.5rem",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  }}
+>
+  <h3 style={{ marginBottom: "1rem" }}>
+    Orders & Revenue — Last 30 Days
+  </h3>
+
+  {data.daily_trend.length === 0 ? (
+    <p>No orders in the last 30 days.</p>
+  ) : (
+    <ResponsiveContainer width="100%" height={380}>
+      <BarChart
+        data={data.daily_trend}
+        margin={{
+          top: 20,
+          right: 30,
+          left: 10,
+          bottom: 10,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+
+        <XAxis
+          dataKey="day"
+          tickFormatter={(date) =>
+            new Date(date).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+            })
+          }
+        />
+
+        <YAxis
+          yAxisId="left"
+          allowDecimals={false}
+          label={{
+            value: "Orders",
+            angle: -90,
+            position: "insideLeft",
+          }}
+        />
+
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          tickFormatter={(value) => `₹${value}`}
+          label={{
+            value: "Revenue",
+            angle: 90,
+            position: "insideRight",
+          }}
+        />
+
+        <Tooltip
+          labelFormatter={(date) =>
+            new Date(date).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
+          }
+          formatter={(value, name) => {
+            if (name === "Revenue") {
+              return [
+                `₹${Number(value).toLocaleString("en-IN")}`,
+                "Revenue",
+              ];
+            }
+
+            return [value, "Orders"];
+          }}
+        />
+
+        <Legend />
+
+        <Bar
+          yAxisId="left"
+          dataKey="order_count"
+          name="Orders"
+          fill="#5A2C76"
+          radius={[6, 6, 0, 0]}
+        />
+
+        <Bar
+          yAxisId="right"
+          dataKey="revenue"
+          name="Revenue"
+          fill="#2AA198"
+          radius={[6, 6, 0, 0]}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  )}
+
+  <p
+    style={{
+      marginTop: "1rem",
+      color: "#777",
+      textAlign: "center",
+      fontSize: "0.9rem",
+    }}
+  >
+    Purple bars represent daily orders and green bars represent daily revenue.
+  </p>
+</div>
         </>
       )}
     </div>
