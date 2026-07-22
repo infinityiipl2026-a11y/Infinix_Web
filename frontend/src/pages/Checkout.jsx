@@ -32,7 +32,7 @@ const Checkout = () => {
 
     pincode: "",
 
-    payment_method: "Cash On Delivery"
+    payment_method: ""
 
   });
 
@@ -99,6 +99,12 @@ const handleOrder = async () => {
   // Pincode
   if (!/^[1-9][0-9]{5}$/.test(formData.pincode.trim())) {
     alert("Please enter a valid 6-digit pincode.");
+    return;
+  }
+
+  // Payment Method
+  if (!formData.payment_method) {
+    alert("Please choose a payment method.");
     return;
   }
 

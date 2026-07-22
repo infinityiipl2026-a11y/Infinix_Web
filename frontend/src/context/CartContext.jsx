@@ -39,6 +39,29 @@ export const CartProvider = ({ children }) => {
     const loadCart = async () => {
       if (user) {
         try {
+          // Merge any items added while browsing as a guest into the
+          // server-backed cart before loading it -- previously these were
+          // silently discarded and overwritten as soon as `user` became
+          // truthy, so anything a guest added before logging in just
+          // vanished from their cart.
+          const guestCartRaw = localStorage.getItem("cart");
+          const guestItems = guestCartRaw ? JSON.parse(guestCartRaw) : [];
+
+          if (guestItems.length > 0) {
+            await Promise.all(
+              guestItems.map((item) =>
+                addCartItem({
+                  user_id: user.id,
+                  product_id: item.product_id,
+                  quantity: item.quantity
+                }).catch((error) =>
+                  console.error("Cart merge error:", error)
+                )
+              )
+            );
+            localStorage.removeItem("cart");
+          }
+
           const response = await getCart(user.id);
           const items = Array.isArray(response)
             ? response

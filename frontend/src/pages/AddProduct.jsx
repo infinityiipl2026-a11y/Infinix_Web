@@ -165,21 +165,25 @@ const AddProduct = () => {
             Select Category
           </option>
 
-          <option value="Perfumes">
-            Perfumes
-          </option>
+          <optgroup label="Household & Hygiene">
+            <option value="Household">Household</option>
+            <option value="Hand Wash">Hand Wash</option>
+            <option value="Sanitizer">Sanitizer</option>
+          </optgroup>
 
-          <option value="Cosmetics">
-            Cosmetics
-          </option>
+          <optgroup label="Personal Care">
+            <option value="Gel">Gel</option>
+            <option value="Soap">Soap</option>
+            <option value="Cosmetics">Cosmetics</option>
+            <option value="Wipes">Wipes</option>
+          </optgroup>
 
-          <option value="Household">
-            Household
-          </option>
-
-          <option value="Soap">
-            Soap
-          </option>
+          <optgroup label="Fragrance & Grooming">
+            <option value="Perfumes">Perfumes</option>
+            <option value="Body Mist">Body Mist</option>
+            <option value="Talcum">Talcum</option>
+            <option value="No Gas Deodorant">No Gas Deodorant</option>
+          </optgroup>
 
         </select>
 

@@ -16,6 +16,7 @@ const ProductDetail = () => {
   const { addToCart, cartItems } = useCart();
 
   const [product, setProduct] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
   const [allProducts, setAllProducts] =
     useState([]);
@@ -45,6 +46,7 @@ const ProductDetail = () => {
       } catch (error) {
 
         console.error(error);
+        setNotFound(true);
 
       }
 
@@ -53,6 +55,18 @@ const ProductDetail = () => {
     loadData();
 
   }, [id]);
+
+  if (notFound) {
+
+    return (
+      <div className="container section" style={{ textAlign: "center" }}>
+        <h2>Product Not Found</h2>
+        <p>This product may have been removed or the link is incorrect.</p>
+        <Link to="/shop" className="btn">Back To Shop</Link>
+      </div>
+    );
+
+  }
 
   if (!product) {
 

@@ -1,9 +1,5 @@
 import { useState } from "react";
-
-// Base URL of the Flask API. Configure via VITE_API_URL in your frontend
-// .env (falls back to localhost for local development).
-const API_URL = import.meta.env?.VITE_API_URL || "https://infinix-web.vercel.app";
-// const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+import { API_BASE_URL } from "../config";
 
 const NAME_RE = /^[A-Za-z\s]{2,50}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -97,7 +93,7 @@ const Contact = () => {
     setStatusMessage("");
 
     try {
-      const response = await fetch(`${API_URL}/contact`, {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

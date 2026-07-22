@@ -83,14 +83,9 @@ const Login = () => {
         />
 
         <div className="auth-row-between">
-          {/* <label className="auth-checkbox">
-            <input type="checkbox" {...register("remember")} />
-            <span>Remember me</span>
-          </label> */}
-
-          {/* <Link to="/forgot-password" className="auth-link">
+          <Link to="/forgot-password" className="auth-link">
             Forgot password?
-          </Link> */}
+          </Link>
         </div>
 
         <FormMessage type={serverMessage.type}>{serverMessage.text}</FormMessage>

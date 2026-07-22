@@ -114,6 +114,12 @@ if IS_PRODUCTION and RATE_LIMIT_STORAGE_URI == "memory://":
     )
 
 # ---------------------------------------------------------------------------
+# Frontend URL (used to build links inside outgoing emails, e.g. password
+# reset links). Set this to the deployed frontend origin in production.
+# ---------------------------------------------------------------------------
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+
+# ---------------------------------------------------------------------------
 # SMTP / contact form email
 # ---------------------------------------------------------------------------
 # Credentials are read only from the environment (.env locally) -- never

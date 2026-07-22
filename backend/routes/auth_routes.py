@@ -1,10 +1,14 @@
 import re
+import smtplib
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
+from email.utils import formataddr
 
 import bcrypt
 import secrets
 from flask import Blueprint, request, jsonify
 
+from config import settings
 from config.db import get_db
 from extensions import limiter
 from utils.auth import generate_token
@@ -89,6 +93,40 @@ def register():
 RESET_TOKEN_TTL_MINUTES = 30
 
 
+def send_reset_email(to_email, token):
+    """
+    Emails the password reset link to the user. Raises on failure so the
+    caller can decide how to handle it (we still return success to the
+    client either way, to avoid leaking which emails are registered).
+    """
+    reset_link = f"{settings.FRONTEND_URL}/reset-password/{token}"
+
+    body = (
+        "We received a request to reset your Infinix account password.\n\n"
+        f"Reset your password using this link (valid for {RESET_TOKEN_TTL_MINUTES} minutes):\n"
+        f"{reset_link}\n\n"
+        "If you didn't request this, you can safely ignore this email."
+    )
+
+    msg = MIMEText(body, "plain", "utf-8")
+    msg["Subject"] = "Reset your Infinix password"
+    msg["From"] = formataddr(("Infinix", settings.SMTP_FROM_EMAIL))
+    msg["To"] = to_email
+
+    if settings.SMTP_PORT == 465:
+        server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
+    else:
+        server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
+
+    try:
+        if settings.SMTP_PORT != 465:
+            server.starttls()
+        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+        server.sendmail(settings.SMTP_FROM_EMAIL, [to_email], msg.as_string())
+    finally:
+        server.quit()
+
+
 @auth_bp.route("/forgot-password", methods=["POST"])
 @limiter.limit("5 per hour")
 def forgot_password():
@@ -128,8 +166,16 @@ def forgot_password():
             )
             conn.commit()
 
-            # TODO: send `token` via email service instead of logging it.
-            print(f"[password-reset] token for {email}: {token}")
+            if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                try:
+                    send_reset_email(email, token)
+                except Exception as email_exc:
+                    # Don't fail the request over an email-delivery issue --
+                    # log it and still return a generic success message.
+                    print("Password reset email send error:", email_exc)
+            else:
+                # Local/dev fallback when SMTP isn't configured.
+                print(f"[password-reset] SMTP not configured. Token for {email}: {token}")
 
         return jsonify({
             "success": True,

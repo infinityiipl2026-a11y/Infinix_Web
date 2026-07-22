@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
         <div className="product-details">
 
           <span className="product-category">
-            {product.category.toUpperCase()}
+            {(product.category || "").toUpperCase()}
           </span>
 
           <h3>

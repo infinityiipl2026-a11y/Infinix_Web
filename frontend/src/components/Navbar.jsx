@@ -314,6 +314,16 @@ const handleSearch = () => {
                   {user.email}
                 </p>
 
+                <Link
+                  to="/dashboard"
+                  className="btn"
+                  onClick={() =>
+                    setShowAuthModal(false)
+                  }
+                >
+                  My Orders
+                </Link>
+
                 <button
                   className="btn"
                   onClick={

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   useCart
 } from "../context/CartContext";
+import { resolveImageUrl } from "../config";
 
 const Cart = () => {
 
@@ -71,7 +72,7 @@ const Cart = () => {
             >
 
               <img
-                src={item.image}
+                src={resolveImageUrl(item.image)}
                 alt={item.name}
               />
 
@@ -136,7 +137,7 @@ const Cart = () => {
 
               {" "}
 
-              ₹{cartTotal}
+              ₹{cartTotal.toFixed(2)}
 
             </h2>
 

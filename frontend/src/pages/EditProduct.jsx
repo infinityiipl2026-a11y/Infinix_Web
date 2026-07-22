@@ -74,7 +74,26 @@ const EditProduct = () => {
       <form className="product-form" onSubmit={handleSubmit}>
         <input name="family" value={form.family} onChange={handleChange} placeholder="Family" required />
         <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
-        <input name="category" value={form.category} onChange={handleChange} placeholder="Category" required />
+        <select name="category" value={form.category} onChange={handleChange} required>
+          <option value="">Select Category</option>
+          <optgroup label="Household & Hygiene">
+            <option value="Household">Household</option>
+            <option value="Hand Wash">Hand Wash</option>
+            <option value="Sanitizer">Sanitizer</option>
+          </optgroup>
+          <optgroup label="Personal Care">
+            <option value="Gel">Gel</option>
+            <option value="Soap">Soap</option>
+            <option value="Cosmetics">Cosmetics</option>
+            <option value="Wipes">Wipes</option>
+          </optgroup>
+          <optgroup label="Fragrance & Grooming">
+            <option value="Perfumes">Perfumes</option>
+            <option value="Body Mist">Body Mist</option>
+            <option value="Talcum">Talcum</option>
+            <option value="No Gas Deodorant">No Gas Deodorant</option>
+          </optgroup>
+        </select>
         <input name="variant" value={form.variant} onChange={handleChange} placeholder="Variant" required />
         <input name="size" value={form.size} onChange={handleChange} placeholder="Size" required />
         <input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" step="0.01" required />
