@@ -296,28 +296,6 @@ const Contact = () => {
 
           </div>
 
-          {/* DELHI MAP */}
-
-          <div
-            className="map-box"
-            style={{
-              marginTop: "20px"
-            }}
-          >
-
-            <h3>Delhi Branch</h3>
-
-            <iframe
-              title="Delhi Branch"
-              src="https://maps.google.com/maps?q=INFINITY%20INDUSTRIES%20PVT%20LTD%20Delhi&t=&z=15&ie=UTF8&iwloc=&output=embed"
-              width="100%"
-              height="250"
-              style={{ border: 0 }}
-              loading="lazy"
-            />
-
-          </div>
-
         </div>
 
       </div>
