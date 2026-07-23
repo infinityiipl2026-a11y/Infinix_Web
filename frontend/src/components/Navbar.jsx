@@ -88,6 +88,8 @@ const handleSearch = () => {
             src="/images/logo1.png"
             alt="Infinix"
             className="nav-logo"
+            width="744"
+            height="276"
           />
 
         </div>
@@ -184,6 +186,8 @@ const handleSearch = () => {
             src="/images/logo2.png"
             alt="Infinix"
             className="nav-logo"
+            width="821"
+            height="382"
           />
 
         </div>

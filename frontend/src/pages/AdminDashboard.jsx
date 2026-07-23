@@ -49,6 +49,9 @@ const AdminDashboard = () => {
             <img
               src={resolveImageUrl(product.image)}
               alt={product.name}
+              loading="lazy"
+              width="300"
+              height="220"
               style={{
                 width: "100%",
                 height: "220px",

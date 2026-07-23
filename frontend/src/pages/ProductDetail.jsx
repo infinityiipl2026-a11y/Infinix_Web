@@ -133,6 +133,9 @@ const ProductDetail = () => {
           <img
             src={resolveImageUrl(product.image)}
             alt={product.name}
+            fetchpriority="high"
+            width="500"
+            height="500"
           />
 
         </div>
@@ -183,6 +186,9 @@ const ProductDetail = () => {
                       <img
                         src={resolveImageUrl(item.image)}
                         alt={item.variant}
+                        loading="lazy"
+                        width="60"
+                        height="60"
                       />
 
                       <span>

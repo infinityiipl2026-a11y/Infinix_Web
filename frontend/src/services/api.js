@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../config";
+import { invalidateProductsCache } from "../api/products";
 
 /* ===========================
    AUTH TOKEN HELPERS
@@ -108,7 +109,9 @@ export const addProduct = async (formData) => {
     headers: authHeaders(false),
     body: formData
   });
-  return response.json();
+  const data = await response.json();
+  if (response.ok) invalidateProductsCache();
+  return data;
 };
 
 export const updateProduct = async (id, product) => {
@@ -117,7 +120,9 @@ export const updateProduct = async (id, product) => {
     headers: authHeaders(),
     body: JSON.stringify(product)
   });
-  return response.json();
+  const data = await response.json();
+  if (response.ok) invalidateProductsCache();
+  return data;
 };
 
 export const deleteProduct = async (id) => {
@@ -125,7 +130,9 @@ export const deleteProduct = async (id) => {
     method: "DELETE",
     headers: authHeaders(false)
   });
-  return response.json();
+  const data = await response.json();
+  if (response.ok) invalidateProductsCache();
+  return data;
 };
 
 export const adminDashboard = async () => {

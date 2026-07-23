@@ -149,6 +149,9 @@ useEffect(() => {
           <img
             src="/images/categories/household.png"
             alt="Household & Hygiene"
+            loading="lazy"
+            width="120"
+            height="120"
           />
 
         </div>
@@ -171,6 +174,9 @@ useEffect(() => {
           <img
             src="/images/categories/personal.png"
             alt="Personal Care"
+            loading="lazy"
+            width="120"
+            height="120"
           />
 
         </div>
@@ -193,6 +199,9 @@ useEffect(() => {
           <img
             src="/images/categories/fragrance.png"
             alt="Fragrance & Grooming"
+            loading="lazy"
+            width="120"
+            height="120"
           />
 
         </div>
@@ -259,6 +268,9 @@ useEffect(() => {
             <img
               src="/images/Infinix Product Images/Gel/Aloevera.jpg"
               alt="Aloe Vera Gel"
+              loading="lazy"
+              width="500"
+              height="500"
             />
 
           </div>
